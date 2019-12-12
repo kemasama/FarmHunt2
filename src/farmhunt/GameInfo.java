@@ -3,8 +3,11 @@ package farmhunt;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import farmhunt.util.ArmorHelper;
@@ -33,7 +36,7 @@ public class GameInfo {
 			return;
 		}
 
-		if (!(Bukkit.getOnlinePlayers().size() > 2)) {
+		if (!(Bukkit.getOnlinePlayers().size() > 1)) {
 			//Game.getInstance().getLogger().info("Failed to start Game: Not enough players!");
 			return;
 		}
@@ -44,24 +47,37 @@ public class GameInfo {
 				DisguiseHelper.setDisguise(pl, EntityType.COW);
 				ArmorHelper.equipToHider(pl);
 				pl.teleport(Game.spawnLocation);
+				pl.sendMessage("§e10秒後にハンターが出現します！それまでに隠れてください！");
+
+				pl.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 999999, 4));
+
+				pl.getInventory().setItem(4, EmeraldItem.emerald.clone());
+				pl.setPlayerListName("§6[A] §f" + pl.getName());
 			}else {
 				ArmorHelper.equipToHunter(pl);
 
 				pl.sendMessage("§eあなたはハンターです！");
+				pl.setPlayerListName("§6[H] §f" + pl.getName());
 				final Player player = pl.getPlayer();
 				(new BukkitRunnable() {
 					@Override
 					public void run() {
 						player.teleport(Game.spawnLocation);
+						Bukkit.broadcastMessage("§eハンターが出現しました！");
+						player.getWorld().playSound(player.getLocation(), Sound.ANVIL_USE, 5f, 1f);
+						Game.addExp(pl, 3 * Game.boostPer);
 					}
 				}).runTaskLater(Game.getInstance(), 20L * 10);
 			}
 		}
 
+		Game.spawnLocation.getWorld().playSound(Game.spawnLocation, Sound.ENDERDRAGON_GROWL, 1f, 1f);
+
 		inGame = true;
 
 	}
 
+	@SuppressWarnings("deprecation")
 	public boolean End() {
 		if (!inGame) {
 			return false;
@@ -85,6 +101,11 @@ public class GameInfo {
 				if (!DisguiseHelper.isDisguise(pl)) {
 					players.append(pl.getName());
 					players.append(", §e");
+
+					pl.sendTitle("§6§lVICTORY", "§ePlayers win!");
+					Game.addExp(pl, 3 * Game.boostPer);
+				}else {
+					pl.sendTitle("§c§lGameOver", "§ePlayers win!");
 				}
 			}
 
@@ -103,6 +124,10 @@ public class GameInfo {
 					if (DisguiseHelper.isDisguise(pl)) {
 						players.append(pl.getName());
 						players.append(", §e");
+						pl.sendTitle("§6§lVICTORY", "§eHiders win!");
+						Game.addExp(pl, 3 * Game.boostPer);
+					}else {
+						pl.sendTitle("§c§lGameOver", "§eHiders win!");
 					}
 				}
 

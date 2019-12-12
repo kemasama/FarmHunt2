@@ -5,13 +5,69 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import farmhunt.nums.GameState;
-import farmhunt.util.BossBarHelper;
 import farmhunt.util.DisguiseHelper;
 import farmhunt.util.ScoreHelper;
+import us.myles.ViaVersion.api.Via;
+import us.myles.ViaVersion.api.boss.BossBar;
+import us.myles.ViaVersion.api.boss.BossColor;
+import us.myles.ViaVersion.api.boss.BossStyle;
 
 public class GameTask extends BukkitRunnable {
 
 	private GameState state = GameState.STOP;
+	private int lobbyTime = 60;
+
+	private BossBar<?> bar;
+
+	public GameTask() {
+		try {
+			if (Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
+				bar = Via.getAPI().createBossBar("§eFarm Hunt", BossColor.YELLOW, BossStyle.SOLID);
+				bar.show();
+			}else {
+				System.out.println("Viaversion is not Enabled!");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void updateBossBar() {
+		if (bar == null) {
+			if (Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
+				bar = Via.getAPI().createBossBar("§eFarm Hunt", BossColor.YELLOW, BossStyle.SOLID);
+				bar.show();
+			}
+			return;
+		}
+
+		try {
+			if (state.equals(GameState.PLAYING)) {
+
+				int time = GameInfo.GAME_TIME - Game.getInstance().info.getTime();
+				int min = time / 60;
+				int sec = time - min * 60;
+				String timeFormat = String.format("%02d:%02d", min, sec);
+
+				float per = ( (float) time ) / ( (float) GameInfo.GAME_TIME );
+				bar.setHealth(per);
+
+				bar.setTitle("§eTime: §c" + timeFormat);
+			}else if (state.equals(GameState.ENDING)) {
+				bar.setTitle("§cGameOver");
+			}
+
+			bar.show();
+
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				if (!bar.getPlayers().contains(p.getUniqueId())) {
+					bar.addPlayer(p.getUniqueId());
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Override
 	public void run() {
@@ -25,7 +81,6 @@ public class GameTask extends BukkitRunnable {
 				Game.getInstance().info.tick();
 
 				if (Game.getInstance().info.End()) {
-					BossBarHelper.removeBossBar();
 					state = GameState.ENDING;
 
 					(new BukkitRunnable() {
@@ -45,27 +100,28 @@ public class GameTask extends BukkitRunnable {
 
 				}
 			}else {
-				if (state.equals(GameState.STOP)) {
+				lobbyTime--;
+				if (state.equals(GameState.STOP) && lobbyTime == 0) {
 					Game.getInstance().info.Start();
+					lobbyTime = 60;
 				}
 			}
 
-			if (BossBarHelper.getBossBar() == null) {
-				BossBarHelper.createBossBar("§eFarm Hunt");
-			}
+			updateBossBar();
 
 			int time = GameInfo.GAME_TIME - Game.getInstance().info.getTime();
 			int min = time / 60;
 			int sec = time - min * 60;
 			String timeFormat = String.format("%02d:%02d", min, sec);
 
-			try {
-				float per = ( (float) time ) / ( (float) GameInfo.GAME_TIME );
-				BossBarHelper.getBossBar().setHealth(per);
-				if (Game.getInstance().info.isInGame()) {
-					BossBarHelper.getBossBar().setTitle("§eTime: §c" + timeFormat);
+			int seeker = 0, hider = 0;
+			for (Player pl : Bukkit.getOnlinePlayers()) {
+				if (DisguiseHelper.isDisguise(pl)) {
+					hider++;
+				}else {
+					seeker++;
 				}
-			} catch (Exception e) {}
+			}
 
 
 			for (Player p : Bukkit.getOnlinePlayers()) {
@@ -79,27 +135,41 @@ public class GameTask extends BukkitRunnable {
 				helper.setTitle("§eFarm Hunt");
 
 				if (state.equals(GameState.PLAYING)) {
-					helper.setSlot(6, "§fTime: §a" + timeFormat);
-					helper.setSlot(5, "");
-					helper.setSlot(4, "§cYou");
+					helper.setSlot(10, "§fTime: §a" + timeFormat);
+					helper.setSlot(9, "§cYou");
 					if (DisguiseHelper.isDisguise(p)) {
-						helper.setSlot(3, "§e" + DisguiseHelper.getSlot(p));
+						helper.setSlot(8, "§e" + DisguiseHelper.getSlot(p));
 					}else {
-						helper.setSlot(3, "§ePlayer");
+						helper.setSlot(8, "§ePlayer");
 					}
+					helper.setSlot(7, "");
+					helper.setSlot(6, "§eAnimals");
+					helper.setSlot(5, " §e" + hider);
+					helper.setSlot(4, "§eSeeker");
+					helper.setSlot(3, " §e" + seeker);
+				}else if (state.equals(GameState.ENDING)) {
+					helper.removeSlot(10);
+					helper.removeSlot(9);
+					helper.removeSlot(8);
+					helper.removeSlot(7);
+					helper.removeSlot(6);
+					helper.removeSlot(5);
+					helper.setSlot(4, "§cGameOver");
+					helper.setSlot(3, " §6HappyNewYear!");
 				}else {
-					helper.setSlot(3, "waiting");
+					helper.setSlot(7, "Waiting");
+					helper.setSlot(6, "Time: §e" + lobbyTime);
+					helper.setSlot(5, "");
+					helper.setSlot(4, "Level: §e" + LevelPoint.getStore(p.getUniqueId()).getLevel());
+					helper.setSlot(3, "Exp: §e" + LevelPoint.getStore(p.getUniqueId()).getEXP() + "/" + LevelPoint.getStore(p.getUniqueId()).getNeedEXP());
 				}
 
 				helper.setSlot(2, "");
 				helper.setSlot(1, "§emc.devras.info");
 
-
-				try {
-					if (state.equals(GameState.PLAYING)) {
-						BossBarHelper.getBossBar().addPlayer(p.getUniqueId());
-					}
-				} catch (Exception e) {}
+				for (Player pl : Bukkit.getOnlinePlayers()) {
+					helper.setHealth(pl, (int) pl.getHealth());
+				}
 
 			}
 

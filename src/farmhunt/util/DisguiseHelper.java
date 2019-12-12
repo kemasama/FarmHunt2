@@ -23,7 +23,7 @@ public class DisguiseHelper {
 
 	public static String getSlot(Player p) {
 
-		if (isDisguise(p)) {
+		if (!isDisguise(p)) {
 			return "Player";
 		}
 

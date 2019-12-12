@@ -4,3 +4,10 @@
 game:
   spawn: null
 
+mysql:
+  user: root
+  pass: 1234
+  name: minecraft
+  host: localhost
+  port: 3306
+

@@ -1,6 +1,6 @@
 main: farmhunt.Game
 name: FarmHunt
-version: 1.0.0
+version: 1.0.1
 description: FarmHunt
 website: https://devras.info
 author: kemq_

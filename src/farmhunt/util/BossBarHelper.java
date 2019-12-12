@@ -13,6 +13,7 @@ public class BossBarHelper {
 	private static BossBar<?> bar = null;
 	public static void createBossBar(String title) {
 		bar = Via.getAPI().createBossBar(title, BossColor.YELLOW, BossStyle.SOLID);
+		bar.hide();
 	}
 
 	public static BossBar<?> getBossBar() {

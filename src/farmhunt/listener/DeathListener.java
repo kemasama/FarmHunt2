@@ -1,7 +1,5 @@
 package farmhunt.listener;
 
-import org.bukkit.Effect;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -15,16 +13,21 @@ import org.bukkit.scheduler.BukkitRunnable;
 import farmhunt.Game;
 import farmhunt.util.ArmorHelper;
 import farmhunt.util.DisguiseHelper;
+import me.libraryaddict.disguise.DisguiseAPI;
 
 public class DeathListener implements Listener {
 
 	@EventHandler
 	public void onDamage(EntityDamageEvent event) {
 		if (event.getEntity() instanceof Player) {
-			Player p = (Player) event.getEntity();
-			if (DisguiseHelper.isDisguise(p)) {
-				p.getWorld().playEffect(p.getLocation(), Effect.FOOTSTEP, Material.REDSTONE_BLOCK);
+			if (!Game.getInstance().info.isInGame()) {
+				event.setCancelled(true);
 			}
+		}else {
+			if (!DisguiseAPI.isDisguised(event.getEntity())) {
+				event.setCancelled(true);
+			}
+
 		}
 	}
 
@@ -58,6 +61,10 @@ public class DeathListener implements Listener {
 
 		p.getWorld().playSound(p.getLocation(), Sound.VILLAGER_YES, 1f, 1f);
 
+		if (p.getKiller() != null) {
+			Game.addExp(p.getKiller(), 10 * Game.boostPer);
+		}
+
 		(new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -65,6 +72,7 @@ public class DeathListener implements Listener {
 				p.teleport(Game.spawnLocation);
 				p.playSound(p.getLocation(), Sound.ANVIL_USE, 1f, 1f);
 				ArmorHelper.equipToHunter(p);
+				p.setPlayerListName("§6[H] §f" + p.getName());
 			}
 		}).runTaskLater(Game.getInstance(), 5L);
 	}
