@@ -43,6 +43,8 @@ public class Game extends JavaPlugin {
 		AllowType.add(DisguiseType.PIG);
 		AllowType.add(DisguiseType.SHEEP);
 		AllowType.add(DisguiseType.WOLF);
+		AllowType.add(DisguiseType.HORSE);
+		AllowType.add(DisguiseType.RABBIT);
 	}
 
 	@Override
