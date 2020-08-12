@@ -31,11 +31,11 @@ public class JoinListener implements Listener {
 		if (Game.getInstance().info.isInGame()) {
 			ArmorHelper.equipToHunter(p);
 			p.teleport(Game.spawnLocation);
-			event.setJoinMessage("§e" + p.getName() + " connect the game!");
+			event.setJoinMessage("§e" + p.getName() + " §econnect the game!");
 			p.setPlayerListName("§6[H] §f" + p.getName());
 			p.sendMessage("§c途中参加のため、ハンターになりました！");
 		}else {
-			event.setJoinMessage("§e" + p.getName() + " joined the game (" + Bukkit.getOnlinePlayers().size() + "/" + Bukkit.getMaxPlayers() + ")");
+			event.setJoinMessage("§e" + p.getName() + " §ejoined the game (" + Bukkit.getOnlinePlayers().size() + "/" + Bukkit.getMaxPlayers() + ")");
 		}
 
 		for (PotionEffect effect : p.getActivePotionEffects()) {
@@ -52,9 +52,9 @@ public class JoinListener implements Listener {
 
 		event.setQuitMessage("");
 		if (Game.getInstance().info.isInGame()) {
-			event.setQuitMessage("§e" + p.getName() + " disconnect!");
+			event.setQuitMessage("§e" + p.getName() + " §edisconnect!");
 		}else {
-			event.setQuitMessage("§e" + p.getName() + " left the game (" + (Bukkit.getOnlinePlayers().size() - 1) + "/" + Bukkit.getMaxPlayers() + ")");
+			event.setQuitMessage("§e" + p.getName() + " §eleft the game (" + (Bukkit.getOnlinePlayers().size() - 1) + "/" + Bukkit.getMaxPlayers() + ")");
 		}
 
 		if (ScoreHelper.hasScore(p)) {

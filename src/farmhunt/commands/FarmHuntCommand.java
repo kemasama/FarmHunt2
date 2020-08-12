@@ -20,6 +20,15 @@ public class FarmHuntCommand implements CommandExecutor {
 		Player p = (Player) sender;
 
 		if (args.length > 0) {
+			if (args[0].equalsIgnoreCase("start")) {
+				if (Game.getInstance().info.isInGame()) {
+					p.sendMessage("§e既に始まっています！");
+				}else {
+					Game.getInstance().task.updateLobbyTime(5);
+					p.sendMessage("§e残り5秒で始まります");
+				}
+				return true;
+			}
 			if (args[0].equalsIgnoreCase("spawn")) {
 				Game.spawnLocation = p.getLocation();
 				Game.getInstance().getConfig().set("game.spawn", Game.spawnLocation);

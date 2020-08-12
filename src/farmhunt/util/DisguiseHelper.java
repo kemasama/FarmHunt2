@@ -49,6 +49,12 @@ public class DisguiseHelper {
 		case WOLF:
 			str = "Wolf";
 			break;
+		case RABBIT:
+			str = "Rabbit";
+			break;
+		case HORSE:
+			str = "Horse";
+			break;
 		default:
 			str = "NONE";
 			break;

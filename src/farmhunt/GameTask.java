@@ -32,6 +32,9 @@ public class GameTask extends BukkitRunnable {
 		}
 	}
 
+	public void updateLobbyTime(int time) {
+		this.lobbyTime = time;
+	}
 	public void updateBossBar() {
 		if (bar == null) {
 			if (Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
@@ -147,15 +150,6 @@ public class GameTask extends BukkitRunnable {
 					helper.setSlot(5, " §e" + hider);
 					helper.setSlot(4, "§eSeeker");
 					helper.setSlot(3, " §e" + seeker);
-				}else if (state.equals(GameState.ENDING)) {
-					helper.removeSlot(10);
-					helper.removeSlot(9);
-					helper.removeSlot(8);
-					helper.removeSlot(7);
-					helper.removeSlot(6);
-					helper.removeSlot(5);
-					helper.setSlot(4, "§cGameOver");
-					helper.setSlot(3, " §6HappyNewYear!");
 				}else {
 					helper.setSlot(7, "Waiting");
 					helper.setSlot(6, "Time: §e" + lobbyTime);

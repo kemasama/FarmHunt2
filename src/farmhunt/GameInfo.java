@@ -1,5 +1,8 @@
 package farmhunt;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -12,6 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import farmhunt.util.ArmorHelper;
 import farmhunt.util.DisguiseHelper;
+import farmhunt.util.FireworkHelper;
 
 public class GameInfo {
 	public static final int GAME_TIME = 60 * 5;
@@ -24,6 +28,9 @@ public class GameInfo {
 	private int time;
 	public int getTime() {
 		return time;
+	}
+	public void setTime(int time) {
+		this.time = time;
 	}
 
 	public void tick() {
@@ -103,9 +110,13 @@ public class GameInfo {
 					players.append(", §e");
 
 					pl.sendTitle("§6§lVICTORY", "§ePlayers win!");
+
 					Game.addExp(pl, 3 * Game.boostPer);
+
+					FireworkHelper.SummonSimple(pl.getLocation());
 				}else {
 					pl.sendTitle("§c§lGameOver", "§ePlayers win!");
+					DisguiseHelper.unDisguise(pl);
 				}
 			}
 
@@ -126,6 +137,9 @@ public class GameInfo {
 						players.append(", §e");
 						pl.sendTitle("§6§lVICTORY", "§eHiders win!");
 						Game.addExp(pl, 3 * Game.boostPer);
+
+						DisguiseHelper.unDisguise(pl);
+						FireworkHelper.SummonSimple(pl.getLocation());
 					}else {
 						pl.sendTitle("§c§lGameOver", "§eHiders win!");
 					}
@@ -150,12 +164,18 @@ public class GameInfo {
 	}
 
 	public Player choosePlayer() {
+		List<Player> players = new ArrayList<Player>(Bukkit.getOnlinePlayers());
+
+		Collections.shuffle(players);
+
 		Player p = null;
-		Random r = new Random();
-		for (Player pl : Bukkit.getOnlinePlayers()) {
+		for (Player pl : players) {
 			if (p == null) {
 				p = pl;
 			}
+
+			// make a new random resources to use a origin seed
+			Random r = new Random(System.nanoTime() + System.currentTimeMillis());
 
 			if (r.nextBoolean()) {
 				p = pl;

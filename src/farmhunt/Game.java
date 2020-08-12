@@ -36,7 +36,7 @@ public class Game extends JavaPlugin {
 	public static Location spawnLocation;
 	public static CMySQL MySQL;
 
-	static {
+	public static void InitAllowType() {
 		AllowType.add(DisguiseType.CHICKEN);
 		AllowType.add(DisguiseType.COW);
 		AllowType.add(DisguiseType.OCELOT);
@@ -75,33 +75,39 @@ public class Game extends JavaPlugin {
 		 * Initializing
 		 */
 
+		InitAllowType();
+
 		saveDefaultConfig();
 		FileConfiguration config = getConfig();
 		config.options().copyDefaults();
 
-		{
+		try {
 			Object obj = config.get("game.spawn");
 			if (obj instanceof Location) {
 				spawnLocation = (Location) obj;
 			}else {
 				spawnLocation = Bukkit.getWorlds().get(0).getSpawnLocation();
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
+		// commands
 		Bukkit.getPluginCommand("farmhunt").setExecutor(new FarmHuntCommand());
 
 
+		// register tasks
 		task = new GameTask();
 		task.runTaskTimer(Game.getInstance(), 0L, 20L);
 
+		// making game infomation
 		info = new GameInfo();
 
+		// register listener (eg: join / build / chat)
 		Bukkit.getPluginManager().registerEvents(new JoinListener(), this);
 		Bukkit.getPluginManager().registerEvents(new BuildListener(), this);
 		Bukkit.getPluginManager().registerEvents(new ChatListener(), this);
-
 		Bukkit.getPluginManager().registerEvents(new CommonListener(), this);
-
 		Bukkit.getPluginManager().registerEvents(new DeathListener(), this);
 
 		// Disguise

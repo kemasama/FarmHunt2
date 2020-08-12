@@ -84,9 +84,6 @@ public class DeathListener implements Listener {
 	@EventHandler
 	public void onDeath(PlayerDeathEvent event) {
 		final Player p = event.getEntity();
-		if (DisguiseHelper.isDisguise(p)) {
-			DisguiseHelper.unDisguise(p);
-		}
 
 		p.getWorld().playSound(p.getLocation(), Sound.VILLAGER_YES, 1f, 1f);
 
@@ -94,24 +91,39 @@ public class DeathListener implements Listener {
 			Game.addExp(p.getKiller(), 10 * Game.boostPer);
 		}
 
-		(new BukkitRunnable() {
-			@Override
-			public void run() {
-				p.spigot().respawn();
-				p.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
-				p.playSound(p.getLocation(), Sound.ANVIL_USE, 1f, 1f);
-				ArmorHelper.equipToHunter(p);
-				p.setPlayerListName("§6[H] §f" + p.getName());
-			}
-		}).runTaskLater(Game.getInstance(), 5L);
+		if (DisguiseHelper.isDisguise(p)) {
+			DisguiseHelper.unDisguise(p);
+			(new BukkitRunnable() {
+				@Override
+				public void run() {
+					p.spigot().respawn();
+					p.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+					p.playSound(p.getLocation(), Sound.ANVIL_USE, 1f, 1f);
+					ArmorHelper.equipToHunter(p);
+					p.setPlayerListName("§6[H] §f" + p.getName());
+				}
+			}).runTaskLater(Game.getInstance(), 5L);
 
-		(new BukkitRunnable() {
-			@Override
-			public void run() {
-				p.spigot().respawn();
-				p.teleport(Game.spawnLocation);
-				p.playSound(p.getLocation(), Sound.ANVIL_USE, 1f, 1f);
-			}
-		}).runTaskLater(Game.getInstance(), 20L * 10);
+			(new BukkitRunnable() {
+				@Override
+				public void run() {
+					p.spigot().respawn();
+					p.teleport(Game.spawnLocation);
+					p.playSound(p.getLocation(), Sound.ANVIL_USE, 1f, 1f);
+				}
+			}).runTaskLater(Game.getInstance(), 20L * 10);
+		}else {
+
+
+			(new BukkitRunnable() {
+				@Override
+				public void run() {
+					p.spigot().respawn();
+					p.teleport(Game.spawnLocation);
+					p.playSound(p.getLocation(), Sound.ANVIL_USE, 1f, 1f);
+					ArmorHelper.equipToHunter(p);
+				}
+			}).runTaskLater(Game.getInstance(), 10L);
+		}
 	}
 }
